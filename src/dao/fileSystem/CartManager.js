@@ -1,6 +1,7 @@
 import * as fs from "fs"
 import rootDir from "../../utils/utils.js"
 import ProductManager from './ProductManager.js'
+import { logger } from "../../utils/Logger.js"
 
 const productsAll = new ProductManager()
 
@@ -24,12 +25,18 @@ export class CartManager {
         return carts.find(cart => cart.id === id)
     }
 
-    createCart = async () =>{
-        const cartsOld = await this.readCarts();
-        const id = cartsOld.length + 1
-        const cartsConcat = [ {id : id, products : []}, ...cartsOld]
-        await this.writeCarts(cartsConcat)
-        return 'added Carts'
+    createCart = async () => {
+        try {
+            const cartsOld = await this.readCarts();
+            const id = cartsOld.length + 1
+            const cartsConcat = [ {id : id, products : []}, ...cartsOld]
+            await this.writeCarts(cartsConcat)
+            return 'added Carts'
+        } catch (error) {
+            logger.error("Error al crear el carrito:", error)
+            throw new Error("Error al crear el carrito", error)
+        }
+
     }
 
     getCarts = async () => {
@@ -54,7 +61,7 @@ export class CartManager {
             const data = await fs.promises.readFile( this.path, "utf-8")
     
             if (data.trim() === "") {
-                console.error("No hay Carritos cargados")
+                logger.error("No hay Carritos cargados")
                 throw new Error("No hay Carritos cargados")
             }
     
@@ -84,7 +91,7 @@ export class CartManager {
     
             return cartList[cartIndex]
             } catch (error) {
-                console.error(error)
+                logger.error(error)
                 throw new Error(error.message)
             }
         }

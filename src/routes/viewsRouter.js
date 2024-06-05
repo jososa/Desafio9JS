@@ -13,16 +13,32 @@ const viewsRouter = Router()
 //const carrito = new CartManager()
 
 viewsRouter.get("/", auth, async (req, res)=>{
+  try {
     let allProducts = await productRepository.getProducts()
     res.render('home', {user: req.session.user, products : allProducts})
+  } catch (error) {
+    req.logger.error(error)
+    res.status(500).json({ error: "Internal Server Error" })
+  }
 })
 
 viewsRouter.get("/realtimeproducts", auth, async (req, res) => {
+  try {
     res.render("realtimeproducts")
+  } catch (error) {
+    req.logger.error(error)
+    res.status(500).json({ error: "Internal Server Error" })
+  }
 })
 
 viewsRouter.get("/chat", auth, (req,res)=>{
+  try {
     res.render("chat")
+  } catch (error) {
+    req.logger.error("Error al cargar chat:", error)
+    res.status(500).send("Error al cargar chat")
+  }
+
 })
 
 viewsRouter.get("/products", auth, async (req, res) => {
@@ -39,7 +55,7 @@ viewsRouter.get("/products", auth, async (req, res) => {
       )
       res.render('products', allProducts)
     } catch (error) {
-      console.error(error)
+      req.logger.error(error)
       res.status(500).send("Error al obtener los productos")
     }
   })
@@ -51,8 +67,9 @@ viewsRouter.get("/products", auth, async (req, res) => {
 
         if(result === null || typeof(result) === 'string') return res.render('cart', { result: false, message: 'ID not found' })
         return res.render('cart', { result })
-    } catch (err) {
-        console.log(err)
+    } catch (error) {
+      req.logger.error(error)
+      res.status(500).json({ error: error.message })
     }
 })
 

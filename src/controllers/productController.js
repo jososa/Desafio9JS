@@ -1,13 +1,14 @@
 import { productService } from "../dao/services/products.service.js"
+import { logger } from "../utils/Logger.js"
 
-export  default class ProductController {
+export default class ProductController {
 
     async getAllProducts(req, res) {
         try {
             const products = await productService.getAllProducts(req.query)
             res.status(200).send({ status: "success", payload: products })
           } catch (error) {
-            console.log(error);
+            req.logger.error("Error al obtener produtos", error)
             res.status(500).send({ status: "error", error: error.message })
           }
       }
@@ -34,6 +35,7 @@ export  default class ProductController {
             newProduct[prop] !== null)
 
         if (!hasAllRequiredProps) {
+          req.logger.warning("Faltan campos para crear el producto")
           return res.status(400).json({
             error:
               "Debes agregar todos los campos requeridos para crear un nuevo producto",
@@ -49,6 +51,7 @@ export  default class ProductController {
           })
         }
         await productService.addProducts(newProduct)
+        req.logger.info("Producto creado correctamente", newProduct)
         res.json({ status: "success", newProduct })
       } catch (error) {
         res.status(400).json({ error: error.message })
@@ -61,7 +64,7 @@ export  default class ProductController {
             let result = await productsModel.find().lean()
             return result
         } catch (error) {
-            return error
+          req.logger.error(error)
         }
     }
 
@@ -70,13 +73,14 @@ export  default class ProductController {
         try {
           const product = await productService.getProductById(pid)
           if (!product) {
+            req.logger.error("Product not found")
             return res
               .status(404)
               .send({ status: "error", error: "Product not found" })
           }
           res.status(200).send({ status: "success", payload: product })
         } catch (error) {
-          console.log(error)
+          req.logger.error(error)
           res.status(500).send({ status: "error", error: error.message })
         }
     }
@@ -85,8 +89,10 @@ export  default class ProductController {
         const productId = req.params.prodId
         try {
           await productService.deleteProduct(productId)
+          req.logger.debug("Producto eliminado")
           res.json({ status: "Producto eliminado" })
         } catch (error) {
+          req.logger.error("Error al eliminar producto", error)
           res.status(400).json({ error: error.message })
         }
     }
@@ -99,8 +105,10 @@ export  default class ProductController {
             productId,
             updatedFields
           );
+          req.logger.debug("Producto actualizado", updatedProduct)
           res.json({ status: "Producto actualizado", updatedProduct })
         } catch (error) {
+          req.logger.error("Error al actualizar producto", error)
           res.status(400).json({ error: error.message })
         }
     }

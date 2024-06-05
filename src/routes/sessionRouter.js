@@ -13,8 +13,8 @@ sessionRouter.post("/register", passport.authenticate('register',{failureRedirec
 })
 
 sessionRouter.get("/failregister", async(req, res)=>{
-  console.log('Error')
-  res.send({error:"Fallo"})
+  req.logger.error("Falló el registro")
+  res.status(400).json({ error: "Falló el registro" })
 })
 
 //Login de Usuario
@@ -30,7 +30,8 @@ sessionRouter.post("/login", passport.authenticate('login',{failureRedirect:"/fa
     age: req.user.age,
     role: req.user.role
   }
-  res.status(200).send({status:"success", payload: req.user})
+  req.logger.info("Usuario logueado", req.session.user)
+  res.status(200).json({ status: "success", payload: req.user })
 })
 
 sessionRouter.get("/faillogin", async(req, res)=>{

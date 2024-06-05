@@ -32,8 +32,8 @@ class TicketController {
                 )
               }
 
-              console.log({ ticket, deletedProducts })
               if (prodInStock.length > 0) {
+                req.logger.debug("Se creó el ticket", createdTicket)
                 res.status(200).json({
                   status: "success",
                   payload: ticket,
@@ -41,9 +41,11 @@ class TicketController {
                   deletedProducts,
                 })
               } else {
-                res.status(500).json({ message: "All the produts are out of stock" });
+                req.logger.error("Error al crear ticket", error)
+                res.status(500).json({ message: "Productos sin stock" });
               }
             } catch (error) {
+              req.logger.error("Error al crear ticket", error)
               res.status(500).json({ status: "Error al crear el ticket", error: error.message });
         }
     }
@@ -52,9 +54,10 @@ class TicketController {
         try {
             const cid = req.params.cid
             const ticket = ticketService.getTicketById(cid)
+            req.logger.debug("Se obtuvo el ticket", ticket)
             res.status(200).json(ticket)
         } catch (error) {
-            console.log(error)
+          req.logger.error("Error al obtener ticket", error)
             res.status(500).send({ status: "Internal Server Error",  error: error.message})
         }
     }

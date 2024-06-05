@@ -18,6 +18,7 @@ import session from "express-session"
 import passport from 'passport'
 import initializePassport from './config/passport.config.js'
 import { environment } from './config/config.js'
+import { addLogger, logger } from "./utils/Logger.js"
 
 //const msg = new messageManager()
 
@@ -25,7 +26,7 @@ const app = express()
 
 connectMongoDB()
 
-const server = app.listen(environment.port,()=>console.log("Listening in",environment.port))
+const server = app.listen(environment.port,()=>logger.info("Listening in",environment.port))
 
 //Middlewares
 app.use(express.urlencoded({ extended: true }))
@@ -63,12 +64,13 @@ app.use(
 initializePassport()
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(addLogger)
 
 //Socket
 const socketServer = new Server(server)
 
 socketServer.on('connection', async(socket)=>{
-    console.log("Conectado al socket del server con ID: ", socket.id)
+    logger.info("Conectado al socket del server con ID: ", socket.id)
 
     const lstProd = await productRepository.getProducts()
     socketServer.emit("listaProductos", lstProd)
@@ -79,7 +81,7 @@ socketServer.on('connection', async(socket)=>{
             const lstProd = await productRepository.getProducts()
             socketServer.emit("listaProductos",lstProd)
         } catch (error) {
-            console.log("Error al crear producto: ", error.message)
+            logger.error("Error al crear producto: ", error.message)
         }
     })
 
@@ -89,7 +91,7 @@ socketServer.on('connection', async(socket)=>{
             const lstProd = await productRepository.getProducts()
             socketServer.emit("listaProductos",lstProd)
         } catch (error) {
-            console.log("Error al eliminar producto: ", error.message)
+            logger.error("Error al eliminar producto: ", error.message)
         }
     })
 
@@ -98,7 +100,7 @@ socketServer.on('connection', async(socket)=>{
             await messageRepository.createMessage(info)
             socketServer.emit("chat", await messageRepository.getMessages())
         } catch (error) {
-            console.log("Error al cargar chat: ", error.message)
+            logger.error("Error al cargar chat: ", error.message)
         }
       })
 

@@ -8,6 +8,7 @@ export default class CartController {
       try {
         res.json({cart})
       } catch (error) {
+        req.logger.error("Error al obtener carrito", error)
         res.status(500).json({ error: error.message })
       }
     }
@@ -18,18 +19,20 @@ export default class CartController {
         const cart = await cartService.getCartById(cid)
         res.json(cart)
       } catch (error) {
-          console.log(error)
+        req.logger.error("Error al obtener carrito", error)
           res.status(500).send({ status: "Internal Server Error",  error: error.message})
       }
     }
 
     createCart = async (req, res) => {
       try {
-        const newCart = await cartService.createCart();
+        const newCart = await cartService.createCart()
+        req.logger.debug("Carrito creado", newCart)
         res.status(201).send({ status: "Carrito creado", payload: newCart })
       } catch (error) {
           console.log(error)
-          res.status(500).send({ status: "Error al crear el carrito",  error: error.message })
+          req.logger.error("Error al crear carrito", error)
+          res.status(500).send({ status: "Error al crear carrito",  error: error.message })
       }
     }
 
@@ -39,8 +42,10 @@ export default class CartController {
     
         try {
           const updatedCart = await cartService.addProductsToCart(cid, pid, quantity)
+          req.logger.debug("Productos agregados al carrito", updatedCart)
           res.status(201).send({ status: "success", payload: updatedCart })
         } catch (error) {
+          req.logger.error("Error al agregar productos al carrito",error)
             res.status(500).send({ status: "error",  error: error.message })
         }
       }
@@ -53,8 +58,9 @@ export default class CartController {
           const result = await cartService.updateProductsInCart(cid, products)
       
           res.status(200).send({ status: "Carrito actualizado con exito" })
+          req.logger.debug("Carrito actualizado con exito", result)
       } catch (error) {
-          console.log(error)
+        req.logger.error("Error al actualizar carrito", error)
       }
     }
 
@@ -63,9 +69,10 @@ export default class CartController {
       const { quantity } = req.body
       try {
           const updatedCart = await cartService.updateProductQuantity(cid, pid, quantity)
+          req.logger.debug("Carrito actualizado", updatedCart)
           res.status(200).send({ status: "success", payload: updatedCart })
       } catch (error) {
-          console.log(error)
+          req.logger.error("Error al actualizar carrito", error)
           res.status(500).send({ status: "error",  error: error.message })
       }
     }
@@ -76,7 +83,7 @@ export default class CartController {
             await cartService.removeProductFromCart(cid, pid)
             res.status(200).send({ status: "success", message: `Se elimino producto ID: ${pid} del carrito` })
         } catch (error) {
-            console.log(error)
+          req.logger.error("Error al eliminar producto del carrito", error)
             res.status(500).send({ status: "error",  error: error.message })
         }
       }
@@ -87,7 +94,7 @@ export default class CartController {
           await cartService.clearCart(cid)
           res.status(204).send({ status: "success", message: `Carrito ID: ${cid} eliminado con exito`, payload: null })
       } catch (error) {
-          console.log(error)
+          req.logger.error("Error al eliminar carrito", error)
           res.status(500).send({ status: "error",  error: error.message })
       }
     }
@@ -95,9 +102,11 @@ export default class CartController {
     async getProductsByCartId(req, res) {
       const cid = req.params.cid
       const cart = await cartService.getProductsByCartId(cid)
+      req.logger.debug("Lista de productos en carrito", cart)
       try {
         res.json(cart.products)
       } catch (error) {
+        req.logger.error("Error al obtener productos del carrito",error)
         res.status(500).json({ error: error.message })
       }
     }

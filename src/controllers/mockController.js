@@ -7,6 +7,7 @@ class MockController {
             const result = await mockService.getProducts()
             res.json({ status: "success", payload: result })
         } catch (error) {
+            req.logger.error("Error al obtener productos", error)
             res.status(500).json({ error: error.message })
         }
     }

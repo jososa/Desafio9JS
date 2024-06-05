@@ -1,6 +1,7 @@
 import { userService } from "../dao/services/users.service.js"
 import { cartService } from "../dao/services/carts.service.js"
 import { createHash, isValidPassword } from "../utils/utils.js"
+import { logger } from "../utils/Logger.js"
 
 class UserController {
 
@@ -9,7 +10,7 @@ class UserController {
         try {
             const user = await userService.findUserByEmail(username)
             if(user){
-                console.log("El usuario ya se encuentra registrado")
+                logger.warning("El usuario ya se encuentra registrado")
                 return done(null, false)
             }
 
@@ -25,8 +26,10 @@ class UserController {
                 role: "usuario"
             }
             const result = userService.createUser(newUser)
+            logger.info("Usuario creado con exito", newUser)
             return done(null, result)
         } catch (error) {
+            logger.error(error)
             return done(error)
         }
     }
@@ -49,12 +52,17 @@ class UserController {
             }
   
             const user = await userService.findUserByEmail(username)
-            if (!user) return done(null, false)
+            if (!user){
+                logger.fatal("Usuario no encontrado")
+                return done(null, false)
+            }
+
             const valid = isValidPassword(user, password)
             if (!valid) return done(null, false)
   
             return done(null, user)
           } catch (error) {
+            logger.error("Usuario no encontrado", error)
             return done(error)
           }
     }
@@ -77,6 +85,7 @@ class UserController {
                 done(null, user)
             }
         } catch (error) {
+            logger.error("Usuario no encontrado", error)
             return done(error)
         }
     }

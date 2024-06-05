@@ -1,5 +1,6 @@
 import {promises as fs} from 'fs'
 import rootDir from "../../utils/utils.js"
+import { logger } from "../../utils/Logger.js"
 
 export class ProductManager {
     constructor() {
@@ -34,7 +35,7 @@ export class ProductManager {
             return fs.writeFile(this.path, JSON.stringify(productAll))
 
         } catch (error) {
-            console.error(error.message)
+            logger.error(error.message)
         }
     }
 
@@ -53,7 +54,7 @@ export class ProductManager {
         if (prod) {
             return prod;
         } else {
-            console.error(`Producto no encontrado. ID: ${productId}`)
+            logger.error(`Producto no encontrado. ID: ${productId}`)
             return null;
         }
     }
@@ -65,7 +66,7 @@ export class ProductManager {
             const index = products.findIndex((product) => product.id == productId)
 
             if (index === -1) {
-                console.error(`No se encontró ningún producto con el ID ${productId}`)
+                logger.error(`No se encontró ningún producto con el ID ${productId}`)
                 throw new Error(`No se encontró ningún producto con el ID ${productId}`)
             }
 
@@ -75,21 +76,19 @@ export class ProductManager {
             return 1
             
         } catch (error) {
-            console.log(`Error al borrar el producto con ID ${productId}: ${error}`)
+            logger.error(`Error al borrar el producto con ID ${productId}: ${error}`)
             throw new Error("Error al borrar el producto");
         }
         
     }
 
     updateProduct = async (pid, campo) => {
-        console.log(pid)
-        console.log(campo)
         try {
             let products = await this.getProducts();
             const index = products.findIndex((product) => product.id == pid)
 
             if (index === -1) {
-                console.error(`No se encontró ningún producto con el ID ${pid}`)
+                logger.error(`No se encontró ningún producto con el ID ${pid}`)
                 throw new Error(`No se encontró ningún producto con el ID ${pid}`)
             }
 
@@ -99,7 +98,7 @@ export class ProductManager {
             return products[index]
             
         } catch (error) {
-            console.log(error)
+            logger.error(error)
             throw new Error("Error al actualizar el producto")
         }
 

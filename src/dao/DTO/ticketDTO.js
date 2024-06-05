@@ -28,7 +28,6 @@ class TicketDTO {
             return prod.product._id
           })
         )
-        console.log("Productos eliminados", deletedProducts)
         return deletedProducts
       }
 

@@ -1,6 +1,9 @@
+import { logger } from "../../utils/Logger"
+
 const socketClient = io()
 
 socketClient.on("listaProductos", (obj)=>{
+    logger.info("Conectado al servidor de WebSocket")
     refreshProducts(obj)
 })
 
